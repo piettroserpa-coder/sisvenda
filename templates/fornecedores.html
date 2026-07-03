@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fornecedores - VendaPlus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-light">
+    <div class="container-fluid mt-4 px-4">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+                    <h4 class="mb-3 text-primary"><i class="fas fa-truck me-2"></i>Novo Fornecedor</h4>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nome da Empresa / Fornecedor</label>
+                            <input type="text" name="nome" class="form-control"
+                                placeholder="Ex: Apple Distribuidora, Importados Grife" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Contato (Telefone, E-mail ou WhatsApp)</label>
+                            <input type="text" name="contato" class="form-control"
+                                placeholder="Ex: (11) 99999-9999 ou comercial@email.com" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-plus me-2"></i>Cadastrar Fornecedor
+                        </button>
+                    </form>
+                </div>
+                <a href="/dashboard" class="btn btn-link mt-3 text-secondary text-decoration-none">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar ao Painel
+                </a>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+                    <h4 class="mb-3"><i class="fas fa-stream me-2"></i>Fornecedores Parceiros</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">ID</th>
+                                    <th>Nome / Razão Social</th>
+                                    <th>Informações de Contato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for forn in fornecedores %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border">#{{ forn.id }}</span></td>
+                                    <td><strong>{{ forn.nome }}</strong></td>
+                                    <td>
+                                        <span class="text-muted"><i
+                                                class="far fa-address-card me-2 text-secondary"></i>{{ forn.contato
+                                            }}</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">
+                                        <i class="fas fa-box-open me-2 fa-lg"></i>Nenhum fornecedor cadastrado ainda.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

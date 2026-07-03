@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despesas - VendaPlus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-principal: #0f172a;
+            --bg-card-menu: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-vendas: #3b82f6;
+        }
+
+        .navbar-custom {
+            background-color: var(--bg-card-menu);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-link-custom {
+            color: var(--text-muted) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .nav-link-custom:hover,
+        .nav-link-custom.active {
+            background: var(--border-color);
+            color: var(--text-main) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand fw-bold text-white" href="/dashboard">
+                <i class="fas fa-rocket me-2" style="color: var(--accent-vendas);"></i>VendaPlus
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto g-2">
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/dashboard"><i
+                                class="fas fa-home me-2"></i>Início</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/vendas"><i
+                                class="fas fa-shopping-cart me-2"></i>Vendas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/clientes"><i
+                                class="fas fa-users me-2"></i>Clientes</a></li>
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/produtos"><i
+                                class="fas fa-box me-2"></i>Estoque</a></li>
+                    <li class="nav-item"><a class="nav-link-custom active text-white" href="/despesas"><i
+                                class="fas fa-wallet me-2"></i>Despesas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/relatorios"><i
+                                class="fas fa-chart-line me-2"></i>Relatórios</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link-custom text-danger" href="/logout"><i
+                                class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+                    <h4 class="mb-4 text-danger fw-bold"><i class="fas fa-arrow-down me-2"></i>Lançar Saída</h4>
+
+                    <form action="/despesas" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Descrição da Despesa</label>
+                            <input type="text" name="descricao" class="form-control"
+                                placeholder="Ex: Conta de Luz, Internet, Aluguel" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Categoria</label>
+                            <select name="categoria" class="form-select" required>
+                                <option value="" disabled selected>Selecione uma categoria...</option>
+                                <option value="Infraestrutura">Infraestrutura</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Salários">Salários</option>
+                                <option value="Reposição de Estoque">Reposição de Estoque</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-secondary">Valor (R$)</label>
+                            <input type="number" name="valor" class="form-control" placeholder="0.00" step="0.01"
+                                min="0.01" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 fw-bold py-2 text-uppercase">
+                            <i class="fas fa-plus-circle me-1"></i> Registrar Gasto
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+                    <h5 class="mb-4 fw-bold text-secondary"><i class="fas fa-file-invoice-dollar me-2"></i>Histórico de
+                        Custos / Saídas</h5>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Data / Hora</th>
+                                    <th>Descrição / Origem</th>
+                                    <th>Categoria</th>
+                                    <th class="text-end">Valor Abatido</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for despesa in despesas %}
+                                <tr>
+                                    <td class="text-muted"><small>{{ despesa.data_gasto }}</small></td>
+                                    <td><strong>{{ despesa.descricao }}</strong></td>
+                                    <td><span class="badge bg-secondary">{{ despesa.categoria }}</span></td>
+                                    <td class="text-end fw-bold text-danger">- R$ {{ "%.2f"|format(despesa.valor) }}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <i class="fas fa-hand-holding-usd mb-2 d-block fs-4 opacity-50"></i>
+                                        Nenhuma despesa ou custo operacional lançado até o momento.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

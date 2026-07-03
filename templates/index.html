@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendaPlus - Premium Mobile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-principal: #0f172a;
+            /* Azul-escuro espacial */
+            --bg-card-menu: #1e293b;
+            /* Slate escuro */
+            --border-color: #334155;
+            /* Borda sutil */
+            --text-main: #f8fafc;
+            /* Branco fosco premium */
+            --text-muted: #94a3b8;
+            /* Cinza para legendas */
+
+            /* Cores dos indicadores */
+            --accent-vendas: #3b82f6;
+            /* Azul */
+            --accent-clientes: #10b981;
+            /* Verde */
+            --accent-estoque: #f59e0b;
+            /* Amarelo */
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navbar Responsiva Superior */
+        .navbar-custom {
+            background-color: var(--bg-card-menu);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand,
+        .nav-link-custom {
+            color: var(--text-main) !important;
+        }
+
+        .nav-link-custom {
+            color: var(--text-muted) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .nav-link-custom:hover,
+        .nav-link-custom.active {
+            background: var(--border-color);
+            color: var(--text-main) !important;
+        }
+
+        /* Cards Estilizados Dark Mobile */
+        .card-stat {
+            background: var(--bg-card-menu);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            transition: 0.3s;
+            color: var(--text-main);
+            height: 100%;
+        }
+
+        .card-stat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Tabelas Dark */
+        .table-dark-custom {
+            background: var(--bg-card-menu) !important;
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table-dark-custom thead th {
+            background-color: #111827 !important;
+            color: var(--text-muted) !important;
+            border-bottom: 2px solid var(--border-color) !important;
+            white-space: nowrap;
+        }
+
+        .table-dark-custom tbody td {
+            border-bottom: 1px solid var(--border-color) !important;
+            background: transparent !important;
+            white-space: nowrap;
+            /* Evita quebra feia de texto no celular */
+        }
+
+        .small-muted {
+            color: var(--text-muted) !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand fw-bold" href="/dashboard">
+                <i class="fas fa-rocket me-2" style="color: var(--accent-vendas);"></i>VendaPlus
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto g-2 pt-2 pt-lg-0">
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom active" href="/dashboard"><i
+                                class="fas fa-home me-2"></i>Início</a></li>
+                    {% endif %}
+
+                    <li class="nav-item"><a class="nav-link-custom" href="/vendas"><i
+                                class="fas fa-shopping-cart me-2"></i>Vendas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/clientes"><i
+                                class="fas fa-users me-2"></i>Clientes</a></li>
+
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/fornecedores"><i
+                                class="fas fa-truck me-2"></i>Fornecedores</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/produtos"><i
+                                class="fas fa-box me-2"></i>Estoque</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/despesas"><i
+                                class="fas fa-wallet me-2"></i>Despesas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/relatorios"><i
+                                class="fas fa-chart-line me-2"></i>Relatórios</a></li>
+                    {% endif %}
+
+                    <li class="nav-item mt-2 mt-lg-0"><a class="nav-link-custom text-danger" href="/logout"><i
+                                class="fas fa-sign-out-alt me-2"></i>Sair ({{ session.get('usuario_nome') }})</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid px-3 py-4">
+
+        {% if alertas %}
+        <div class="alert alert-danger border-0 shadow-sm mb-4"
+            style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-radius: 12px;">
+            <h5 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i> Atenção: Itens com Estoque Baixo!
+            </h5>
+            <ul class="mb-0 small">
+                {% for alerta in alertas %}
+                <li class="mb-1">
+                    O produto <strong>{{ alerta.nome }}</strong> possui apenas <span class="badge bg-danger">{{
+                        alerta.estoque }}</span> unidades restando (Mínimo recomendado: {{ alerta.quantidade_minima }}).
+                    {% if alerta.fornecedor_nome %}
+                    <br><span class="text-white-50 shadow-sm"><i class="fas fa-phone-alt me-1 text-warning"></i> Contato
+                        Fornecedor (<strong>{{ alerta.fornecedor_nome }}</strong>): {{ alerta.fornecedor_contato
+                        }}</span>
+                    {% else %}
+                    <br><span class="text-muted small"><i class="fas fa-info-circle me-1"></i> Nenhum fornecedor
+                        associado a este produto.</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div
+            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+            <h2 class="fw-bold m-0 fs-3">Painel Geral</h2>
+            <span class="badge border p-2 px-3"
+                style="background: var(--bg-card-menu); border-color: var(--border-color) !important; color: var(--text-main);">
+                <i class="far fa-calendar me-2" style="color: var(--accent-vendas);"></i>Maio, 2026
+            </span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-4" onclick="location.href='/vendas'" style="cursor:pointer">
+                <div class="card card-stat p-3" style="border-left: 5px solid var(--accent-vendas);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="small-muted mb-1 text-uppercase fs-7 fw-semibold tracking-wider">Total Vendas
+                            </h6>
+                            <h3 class="fw-bold mb-0 fs-4">R$ {{ "%.2f"|format(total_vendas) }}</h3>
+                        </div>
+                        <div class="icon-box"
+                            style="background: rgba(59, 130, 246, 0.15); color: var(--accent-vendas);">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4" onclick="location.href='/clientes'" style="cursor:pointer">
+                <div class="card card-stat p-3" style="border-left: 5px solid var(--accent-clientes);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="small-muted mb-1 text-uppercase fs-7 fw-semibold tracking-wider">Clientes</h6>
+                            <h3 class="fw-bold mb-0 fs-4">+{{ total_clientes }}</h3>
+                        </div>
+                        <div class="icon-box"
+                            style="background: rgba(16, 185, 129, 0.15); color: var(--accent-clientes);">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4" onclick="location.href='/produtos'" style="cursor:pointer">
+                <div class="card card-stat p-3" style="border-left: 5px solid var(--accent-estoque);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="small-muted mb-1 text-uppercase fs-7 fw-semibold tracking-wider">Estoque Atual
+                            </h6>
+                            <h3 class="fw-bold mb-0 fs-4"><span style="color: var(--accent-estoque);">{{ total_estoque
+                                    }}</span> un</h3>
+                        </div>
+                        <div class="icon-box"
+                            style="background: rgba(245, 158, 11, 0.15); color: var(--accent-estoque);">
+                            <i class="fas fa-boxes-stacked"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 border-0 table-dark-custom">
+            <div class="card-body p-3 p-md-4">
+                <h5 class="mb-3 fw-bold fs-5"><i class="fas fa-history me-2 small-muted"></i>Últimas Atividades</h5>
+
+                <div class="table-responsive">
+                    <table class="table align-middle m-0">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Produto</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for atividade in atividades %}
+                            <tr>
+                                <td><small class="small-muted">{{ atividade.data_venda }}</small></td>
+                                <td><span class="badge"
+                                        style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 5px 8px;">Venda</span>
+                                </td>
+                                <td><strong style="color: var(--text-main); font-weight: 500;">{{ atividade.produto_nome
+                                        }}</strong></td>
+                                <td class="fw-bold" style="color: var(--accent-clientes);">R$ {{
+                                    "%.2f"|format(atividade.valor_total) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 small-muted">
+                                    <i class="fas fa-receipt mb-2 d-block fs-4 opacity-50"></i>
+                                    Nenhuma venda registrada recentemente.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

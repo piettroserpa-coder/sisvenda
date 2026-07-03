@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas - VendaPlus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-principal: #0f172a;
+            --bg-card-menu: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-vendas: #3b82f6;
+        }
+
+        .navbar-custom {
+            background-color: var(--bg-card-menu);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-link-custom {
+            color: var(--text-muted) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .nav-link-custom:hover,
+        .nav-link-custom.active {
+            background: var(--border-color);
+            color: var(--text-main) !important;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top mb-4">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand fw-bold text-white" href="/dashboard">
+                <i class="fas fa-rocket me-2" style="color: var(--accent-vendas);"></i>VendaPlus
+            </a>
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <i class="fas fa-bars fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto g-2">
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/dashboard"><i
+                                class="fas fa-home me-2"></i>Início</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link-custom active text-white" href="/vendas"><i
+                                class="fas fa-shopping-cart me-2"></i>Vendas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/clientes"><i
+                                class="fas fa-users me-2"></i>Clientes</a></li>
+                    {% if session.get('usuario_cargo') == 'admin' %}
+                    <li class="nav-item"><a class="nav-link-custom" href="/produtos"><i
+                                class="fas fa-box me-2"></i>Estoque</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/despesas"><i
+                                class="fas fa-wallet me-2"></i>Despesas</a></li>
+                    <li class="nav-item"><a class="nav-link-custom" href="/relatorios"><i
+                                class="fas fa-chart-line me-2"></i>Relatórios</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link-custom text-danger" href="/logout"><i
+                                class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert"
+            style="border-radius: 12px;">
+            <i class="fas fa-exclamation-triangle me-2"></i> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card p-4 shadow-sm border-0 mb-4" style="border-radius: 15px;">
+                    <h3 class="mb-4 text-primary fw-bold"><i class="fas fa-cash-register me-2"></i>Caixa de Vendas</h3>
+
+                    <form action="/vendas/adicionar" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">1. Selecione o Cliente</label>
+                            <select name="cliente_id" class="form-select" required>
+                                <option value="" disabled selected>Escolha o cliente desta venda...</option>
+                                {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.id }} - {{ cliente.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-bold text-secondary">2. Adicionar Produto</label>
+
+                                <select name="produto_id" class="form-select" id="produto_select" required>
+                                    <option value="" disabled selected>Escolha o produto...</option>
+                                    {% for prod in produtos %}
+                                    <option value="{{ prod.id }}" {% if prod.estoque <=0 %} disabled style="color: red;"
+                                        {% endif %}>
+                                        {{ prod.nome }} - R$ {{ prod.preco }} {% if prod.estoque <= 0 %} (ESTOQUE
+                                        ZERADO) {% else %} (Qtd: {{ prod.estoque }}) {% endif %} </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-secondary">Quantidade</label>
+                                <input type="number" name="quantidade" class="form-control" value="1" min="1" required>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100 fw-bold"><i
+                                        class="fas fa-plus me-1"></i> Inserir</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card p-4 shadow-sm border-0" style="border-radius: 15px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2 text-secondary"></i>Itens no Carrinho</h5>
+                        {% if carrinho %}
+                        <a href="/vendas/limpar" class="btn btn-sm btn-outline-danger fw-bold">Limpar Carrinho</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Produto</th>
+                                    <th>Preço Un.</th>
+                                    <th>Qtd</th>
+                                    <th>Subtotal</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </table>
+                            </thead>
+                            <tbody>
+                                {% if carrinho %}
+                                {% for item in carrinho %}
+                                <tr>
+                                    <td>{{ item.id }}</td>
+                                    <td><strong>{{ item.nome }}</strong></td>
+                                    <td>R$ {{ "%.2f"|format(item.preco) }}</td>
+                                    <td>{{ item.id }} un</td>
+                                    <td class="fw-bold text-primary">R$ {{ "%.2f"|format(item.subtotal) }}</td>
+                                    <td class="text-center">
+                                        <a href="/vendas/remover/{{ item.id }}" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash-alt me-1"></i> Remover Item
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="fas fa-shopping-basket mb-2 d-block fs-4 opacity-50"></i>
+                                        O carrinho está vazio. Adicione itens acima.
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card p-4 text-white shadow border-0"
+                    style="border-radius: 15px; background: linear-gradient(145deg, #1e293b, #0f172a);">
+                    <h5 class="text-uppercase tracking-wider small text-secondary fw-bold">Subtotal Acumulado</h5>
+                    <h1 class="display-6 fw-bold my-3 text-info">R$ {{ "%.2f"|format(total) }}</h1>
+
+                    {% if carrinho %}
+                    <form action="/vendas/finalizar" method="POST" class="mt-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-light">Forma de Pagamento</label>
+                            <select name="forma_pagamento" class="form-select bg-dark text-white border-secondary"
+                                required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-light">Desconto Especial (R$)</label>
+                            <input type="number" name="desconto"
+                                class="form-control bg-dark text-white border-secondary" placeholder="0.00" step="0.01"
+                                min="0">
+                        </div>
+
+                        <button type="submit"
+                            class="btn btn-success btn-lg w-100 py-3 fw-bold text-uppercase shadow-sm">
+                            <i class="fas fa-check-circle me-2"></i>Finalizar Compra
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="mt-4">
+                        <button class="btn btn-secondary btn-lg w-100 py-3 fw-bold text-uppercase" disabled>Carrinho
+                            Vazio</button>
+                    </div>
+                    {% endif %}
+
+                    <a href="/dashboard" class="btn btn-outline-light w-100 mt-3 border-secondary text-muted"><i
+                            class="fas fa-arrow-left me-2"></i>Voltar ao Painel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
